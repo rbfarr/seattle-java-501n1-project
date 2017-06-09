@@ -30,6 +30,48 @@ public class ZooUtils {
         return conn;
     }
 
+    public static void setPersonAge(Connection con, String personName, int age) throws SQLException {
+        Statement stmt = null;
+        String query = "UPDATE person SET age=" + age + " WHERE name=\'" + personName + "\'";
+
+        try {
+            stmt = con.createStatement();
+            stmt.executeUpdate(query);
+        } catch (SQLException e ) {
+            LOG.error(e.getMessage());
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
+        }
+    }
+
+    public static int getPersonAge(Connection con, String personName) throws SQLException {
+        Statement stmt = null;
+        String query = "SELECT name,age FROM person";
+
+        try {
+            stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                String name = rs.getString("name");
+                int age = rs.getInt("age");
+
+                if (name.equals(personName)) {
+                    return age;
+                }
+            }
+        } catch (SQLException e ) {
+            LOG.error(e.getMessage());
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
+        }
+
+        return -1;
+    }
+
     public static void viewTable(Connection con) throws SQLException {
         Statement stmt = null;
         String query = "SELECT name,age FROM person";
