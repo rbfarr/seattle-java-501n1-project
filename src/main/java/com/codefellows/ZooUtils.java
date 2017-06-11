@@ -1,5 +1,6 @@
 package com.codefellows;
 
+import com.codefellows.dbmodels.Person;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,15 +18,20 @@ public class ZooUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(ZooUtils.class);
 
-    public static Connection getConnection() throws SQLException, ClassNotFoundException {
+    public static Connection getConnection() {
         Connection conn = null;
-        Properties connectionProps = new Properties();
 
-        connectionProps.put("user", DB_USER);
-        connectionProps.put("password", DB_PASS);
+        try {
+            Properties connectionProps = new Properties();
 
-        conn = DriverManager.getConnection("jdbc:mysql://" + DB_HOST + "/" + DB_NAME, connectionProps);
-        LOG.info("Connected to database");
+            connectionProps.put("user", DB_USER);
+            connectionProps.put("password", DB_PASS);
+
+            conn = DriverManager.getConnection("jdbc:mysql://" + DB_HOST + "/" + DB_NAME, connectionProps);
+            LOG.info("Connected to database");
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+        }
 
         return conn;
     }
@@ -72,18 +78,21 @@ public class ZooUtils {
         return -1;
     }
 
-    public static void viewTable(Connection con) throws SQLException {
+    public static String viewTable(Connection con) throws SQLException {
         Statement stmt = null;
         String query = "SELECT name,age FROM person";
+
+        StringBuilder stringBuilder = new StringBuilder();
 
         try {
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(query);
+
             while (rs.next()) {
                 String name = rs.getString("name");
                 int age = rs.getInt("age");
 
-                LOG.info("name: " + name + " age: " + age);
+                stringBuilder.append("<p>" + new Person(name, age) + "</p>");
             }
         } catch (SQLException e ) {
             LOG.error(e.getMessage());
@@ -92,5 +101,7 @@ public class ZooUtils {
                 stmt.close();
             }
         }
+
+        return stringBuilder.toString();
     }
 }
